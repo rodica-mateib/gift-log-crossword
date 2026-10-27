@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gift Log · A Birthday Crossword</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--wine:#5d1f1c;--burgundy:#7b2d26;--sienna:#a4552f;--clay:#c97b4a;--cream:#fbf4ea;--paper:#fffaf3;--gold:#d9a441;--ink:#2f1a15}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:Inter,sans-serif;background:radial-gradient(1100px 500px at 85% -10%,#f7d9bd 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#efd3c2 0,transparent 55%),linear-gradient(160deg,var(--cream),#f4e0cd)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(120deg,var(--wine),var(--burgundy) 45%,var(--sienna));color:#fff;padding:58px 20px 78px;text-align:center}
+.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;filter:blur(2px);opacity:.16;background:radial-gradient(circle,#ffd9a8,transparent 70%)}
+.hero:before{width:340px;height:340px;top:-120px;left:-80px}.hero:after{width:420px;height:420px;bottom:-180px;right:-100px}
+.eyebrow{display:inline-block;font:600 12px/1 Inter;letter-spacing:.28em;text-transform:uppercase;color:#ffd9a8;border:1px solid rgba(255,217,168,.45);padding:9px 14px;border-radius:999px;margin-bottom:18px}
+h1{font:700 clamp(38px,8vw,68px)/1.05 "Cormorant Garamond",serif;margin:0}h1 em{font-style:italic;color:#ffd9a8}
+.hero p{max-width:620px;margin:14px auto 0;font-size:17px;line-height:1.6;color:#ffe9d2}
+main{max-width:1080px;margin:52px auto 0;padding:0 20px 60px}
+.panel{background:var(--paper);border:1px solid #ecd3ba;border-radius:22px;box-shadow:0 24px 60px rgba(93,31,28,.16);padding:28px}
+.gridwrap{display:flex;justify-content:center;padding:10px 0 4px;overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(14,min(40px,7.2vw));gap:3px}
+.cell,.block{width:min(40px,7.2vw);height:min(40px,7.2vw);position:relative}.block{background:transparent}
+.cell{background:#fff;border:1.5px solid #d8b294;border-radius:7px;transition:.15s}
+.cell input{width:100%;height:100%;border:0;border-radius:5px;background:transparent;text-align:center;font:700 clamp(13px,3.1vw,19px) "Cormorant Garamond",serif;color:var(--burgundy);text-transform:uppercase;outline:none}
+.cell .num{position:absolute;top:2px;left:4px;font:700 9px/1 Inter;color:var(--sienna);pointer-events:none}
+.cell.word{background:#fff1df;border-color:var(--clay)}.cell.active{border-color:var(--gold);box-shadow:0 0 0 2.5px rgba(217,164,65,.55) inset}
+.cell.correct{background:#eaf4e5;border-color:#6f9a5e}.cell.correct input{color:#3f6b33}
+.toolbar{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:24px 0 28px}
+.progress{font:600 13px Inter;color:var(--sienna);background:#fff3e2;border:1px solid #eed0ae;padding:10px 16px;border-radius:999px}
+button{font:700 15px Inter;border:0;cursor:pointer;padding:13px 24px;border-radius:999px;background:linear-gradient(120deg,var(--burgundy),var(--sienna));color:#fff;box-shadow:0 8px 20px rgba(123,45,38,.22);transition:.18s}
+button:hover{transform:translateY(-1px)}button.ghost{background:transparent;color:var(--burgundy);border:1.5px solid var(--burgundy);box-shadow:none}
+.clues{display:grid;grid-template-columns:1fr 1fr;gap:22px}@media(max-width:760px){.clues{grid-template-columns:1fr}.panel{padding:18px}}
+.cluecard{background:#fff;border:1px solid #eed7bf;border-radius:16px;padding:18px 20px}
+h2{font:700 24px "Cormorant Garamond",serif;color:var(--burgundy);margin:0 0 12px}
+.clue{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;cursor:pointer;line-height:1.55;font-size:15px;transition:.15s}
+.clue:hover{background:#fff3e2}.clue.active{background:#fff1df;color:var(--sienna);font-weight:600}.clue.done{color:#6f9a5e;text-decoration:line-through}
+.cnum{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;background:var(--burgundy);color:#fff;font:700 12px/1 Inter}
+#reveal{display:none;margin-top:28px}#reveal.show{display:block;animation:rise .7s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}
+.revealhead{text-align:center;margin-bottom:22px}.revealhead h2{font-size:36px}.revealhead p{margin:6px auto 0;max-width:560px;color:#6b4a3c}
+.gifts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+.gift{position:relative;background:linear-gradient(160deg,#fff8ec,#ffe7c9);border:1px solid var(--gold);border-radius:16px;padding:20px 16px 16px;text-align:center;box-shadow:0 10px 24px rgba(169,85,47,.12)}
+.gift .tag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--burgundy);color:#fff;font:700 10px/1 Inter;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;border-radius:999px}
+.gift h3{font:700 23px "Cormorant Garamond",serif;color:var(--wine);margin:8px 0 0}
+#confetti{position:fixed;inset:0;pointer-events:none;display:none;z-index:50}
+</style>
+</head>
+<body>
+<header class="hero"><span class="eyebrow">Happy 32nd Birthday</span><h1>The <em>Gift Log</em></h1><p>Six little mysteries, six things waiting for you. Solve the crossword and the birthday loot reveals itself.</p></header>
+<main>
+<section class="panel">
+<div class="gridwrap"><div class="grid" id="grid"></div></div>
+<div class="toolbar"><span class="progress" id="progress">0 / 6 gifts decoded</span><button id="check" type="button">Reveal gifts</button><button id="clear" type="button" class="ghost">Start over</button></div>
+<div class="clues">
+<div class="cluecard"><h2>Across</h2><div id="across"></div></div>
+<div class="cluecard"><h2>Down</h2><div id="down"></div></div>
+</div>
+</section>
+<section class="panel" id="reveal">
+<div class="revealhead"><h2>🎁 Gift Log unlocked</h2><p>Happy birthday to my favourite programmer, DJ, Ferrari fan, train enthusiast and adventure partner.</p></div>
+<div class="gifts">
+<article class="gift"><span class="tag">Gift 1</span><h3>Red Pants</h3></article>
+<article class="gift"><span class="tag">Gift 2</span><h3>Blue Pants</h3></article>
+<article class="gift"><span class="tag">Gift 3</span><h3>Cake</h3></article>
+<article class="gift"><span class="tag">Gift 4</span><h3>Movie Date</h3></article>
+<article class="gift"><span class="tag">Gift 5</span><h3>Dinner</h3></article>
+<article class="gift"><span class="tag">Gift 6</span><h3>Sinaia</h3></article>
+</div>
+</section>
+</main>
+<canvas id="confetti"></canvas>
+<script>
+(function(){
+'use strict';
+var W={
+ CAKE:{dir:'down',r:1,c:4,num:1,clue:'Sweetest part of the celebration — ideally with candles'},
+ REDPANTS:{dir:'down',r:1,c:5,num:2,clue:'Your favourite shade of red, but make it wearable'},
+ DINNER:{dir:'across',r:3,c:5,num:3,clue:'Tonight we trade the couch for a table for two'},
+ BLUEPANTS:{dir:'across',r:4,c:1,num:4,clue:'Nine letters for the cooler pair waiting in your wardrobe'},
+ SINAIA:{dir:'down',r:4,c:9,num:5,clue:'Mountains, fresh air and a train ride away — our next escape'},
+ MOVIEDATE:{dir:'across',r:8,c:6,num:6,clue:'Popcorn, a big screen and your pick of film — together'}
+};
+var giftWords=['REDPANTS','BLUEPANTS','CAKE','MOVIEDATE','DINNER','SINAIA'];
+var grid=document.getElementById('grid'),acrossEl=document.getElementById('across'),downEl=document.getElementById('down');
+var checkBtn=document.getElementById('check'),clearBtn=document.getElementById('clear'),progressEl=document.getElementById('progress'),revealEl=document.getElementById('reveal'),canvas=document.getElementById('confetti');
+var cells=[],inputs=[],clueEls=[],dir='across',active=null;
+function cellAt(r,c){return grid.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');}
+function inputOf(cell){return cell?cell.querySelector('input'):null;}
+function wordCells(word){var m=W[word],out=[],i;for(i=0;i<word.length;i++){out.push(cellAt(m.r+(m.dir==='down'?i:0),m.c+(m.dir==='across'?i:0)));}return out;}
+function isWordCorrect(word){var list=wordCells(word),i;for(i=0;i<list.length;i++){var inp=inputOf(list[i]);if(!inp||inp.value!==inp.getAttribute('data-answer'))return false;}return true;}
+function updateProgress(){var done=0,w;for(w in W){if(isWordCorrect(w))done++;}progressEl.textContent=done+' / 6 gifts decoded';return done;}
+function paint(){cells.forEach(function(c){c.classList.remove('active','word');});clueEls.forEach(function(c){c.classList.remove('active');});if(!active)return;active.classList.add('active');var word=active.getAttribute('data-'+dir);if(!word)return;wordCells(word).forEach(function(c){c.classList.add('word');});var clue=document.querySelector('.clue[data-word="'+word+'"]');if(clue)clue.classList.add('active');}
+function setActive(cell,keep){active=cell;if(cell&&!keep&&!cell.getAttribute('data-'+dir)){dir=(dir==='across')?'down':'across';}paint();var inp=inputOf(active);if(inp)inp.focus();}
+function advance(step){if(!active)return;var word=active.getAttribute('data-'+dir);if(!word)return;var list=wordCells(word);var next=list[list.indexOf(active)+step];if(next)setActive(next,true);}
+function checkAll(mark){var solved={},w;for(w in W){var ok=isWordCorrect(w),list=wordCells(w),clue=document.querySelector('.clue[data-word="'+w+'"]');list.forEach(function(c){if(mark)c.classList.toggle('correct',ok);});if(mark)clue.classList.toggle('done',ok);if(ok)solved[w]=true;}updateProgress();return solved;}
+function allSolved(solved){return giftWords.every(function(w){return solved[w]===true;});}
+function build(){
+ var maxR=9,maxC=14,letter={},starts={},mem={},w,m,i;
+ for(w in W){m=W[w];starts[m.r+','+m.c]=m.num;for(i=0;i<w.length;i++){var r=m.r+(m.dir==='down'?i:0),c=m.c+(m.dir==='across'?i:0);letter[r+','+c]=w[i];if(!mem[r+','+c])mem[r+','+c]={};mem[r+','+c][m.dir]=w;}}
+ for(var r=1;r<=maxR;r++){for(var c=1;c<=maxC;c++){var k=r+','+c;
+  if(letter[k]){var d=document.createElement('div');d.className='cell';d.setAttribute('data-r',r);d.setAttribute('data-c',c);d.setAttribute('data-across',mem[k].across||'');d.setAttribute('data-down',mem[k].down||'');
+   var n=document.createElement('span');n.className='num';n.textContent=starts[k]||'';d.appendChild(n);
+   var inp=document.createElement('input');inp.maxLength=1;inp.setAttribute('autocomplete','off');inp.setAttribute('data-answer',letter[k]);d.appendChild(inp);grid.appendChild(d);cells.push(d);inputs.push(inp);}
+  else{var b=document.createElement('div');b.className='block';grid.appendChild(b);}}}
+ Object.keys(W).forEach(function(word){var m=W[word];var el=document.createElement('div');el.className='clue';el.setAttribute('data-word',word);el.setAttribute('data-dir',m.dir);el.innerHTML='<span class="cnum">'+m.num+'</span><span>'+m.clue+'</span>';(m.dir==='across'?acrossEl:downEl).appendChild(el);clueEls.push(el);});
+}
+function launchConfetti(){var ctx=canvas.getContext('2d');canvas.width=window.innerWidth;canvas.height=window.innerHeight;canvas.style.display='block';var colors=['#7b2d26','#a4552f','#d9a441','#ffd9a8','#6f9a5e','#fffaf3'],pieces=[],i;for(i=0;i<180;i++){pieces.push({x:Math.random()*canvas.width,y:-20-Math.random()*canvas.height*.5,w:6+Math.random()*8,h:8+Math.random()*12,color:colors[Math.floor(Math.random()*colors.length)],vy:2+Math.random()*4,vx:-1.5+Math.random()*3,rot:Math.random()*6.28,vr:-.15+Math.random()*.3});}var start=Date.now();(function frame(){ctx.clearRect(0,0,canvas.width,canvas.height);pieces.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});if(Date.now()-start<6000){requestAnimationFrame(frame);}else{canvas.style.display='none';ctx.clearRect(0,0,canvas.width,canvas.height);}})();}
+build();
+inputs.forEach(function(inp){var cell=inp.closest('.cell');
+ inp.addEventListener('focus',function(){if(active!==cell)setActive(cell,true);});
+ inp.addEventListener('click',function(){if(active===cell)dir=(dir==='across')?'down':'across';setActive(cell,true);});
+ inp.addEventListener('input',function(e){var v=e.target.value.replace(/[^a-zA-Z]/g,'').toUpperCase();e.target.value=v.slice(-1);checkAll(false);if(v)advance(1);});
+ inp.addEventListener('keydown',function(e){var r=+cell.getAttribute('data-r'),c=+cell.getAttribute('data-c');
+  if(e.key==='Backspace'){if(!inp.value){advance(-1);if(active)inputOf(active).value='';}e.preventDefault();}
+  else if(e.key==='ArrowRight'){setActive(cellAt(r,c+1),true);e.preventDefault();}
+  else if(e.key==='ArrowLeft'){setActive(cellAt(r,c-1),true);e.preventDefault();}
+  else if(e.key==='ArrowDown'){setActive(cellAt(r+1,c),true);e.preventDefault();}
+  else if(e.key==='ArrowUp'){setActive(cellAt(r-1,c),true);e.preventDefault();}
+  else if(e.key===' '){dir=(dir==='across')?'down':'across';setActive(active,true);e.preventDefault();}});});
+clueEls.forEach(function(el){el.addEventListener('click',function(){dir=el.getAttribute('data-dir');setActive(wordCells(el.getAttribute('data-word'))[0],true);});});
+checkBtn.addEventListener('click',function(){var solved=checkAll(true);if(allSolved(solved)){revealEl.classList.add('show');launchConfetti();setTimeout(function(){revealEl.scrollIntoView({behavior:'smooth',block:'center'});},250);}});
+clearBtn.addEventListener('click',function(){inputs.forEach(function(i){i.value='';i.closest('.cell').classList.remove('correct');});clueEls.forEach(function(c){c.classList.remove('done');});revealEl.classList.remove('show');updateProgress();paint();});
+setActive(cellAt(1,4),false);updateProgress();
+})();
+</script>
+</body>
+</html>
